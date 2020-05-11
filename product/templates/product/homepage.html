@@ -1,0 +1,181 @@
+{% extends "login/basic.html" %} {% block body %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<style>
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+    
+    .carousel-indicators .active {
+        background-color: blue;
+    }
+    
+    .col-md-3 img {
+        width: 255px;
+        height: 355px;
+    }
+    
+    body .carousel-indicator li {
+        background-color: blue;
+    }
+    
+    body .carousel-indicators {
+        bottom: 0;
+    }
+    
+    body .carousel-control-prev-icon,
+    body .carousel-control-next-icon {
+        background-color: blue;
+    }
+    
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .carousel-control-next,
+    .carousel-control-prev {
+        top: auto;
+        bottom: auto;
+    }
+    
+    body .carousel-control-prev-icon,
+    body .carousel-control-next-icon {
+        background-color: blue;
+        margin-top: 222px;
+    }
+</style>
+
+
+<!--h1>VAISHNAVI</h1-->
+
+<main role="main" class="container my-3">
+    <form action="search">
+        <div class="form-row">
+            <div class="form-group col-12">
+                <div class="input-group">
+                    <input class="form-control py-2 border-right-0 border" type="search" name="title" placeholder="Product Name..." />
+                    <span class="input-group-append">
+                        <div class="input-group-text bg-transparent">
+                            <i class="fa fa-search"></i>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2 col-lg-2">
+                <label for="viewCountMin">Minimum Rent</label>
+                <input type="number" min=0 class="form-control" id="MinRent" placeholder="0" name="minrent">
+            </div>
+            <div class="form-group col-md-2 col-lg-2">
+                <label for="viewCountMax">Maximum Rent</label>
+                <input type="number" min=0 class="form-control" id="MaxRent" name="maxrent">
+            </div>
+            <div class="form-group col-md-2 col-lg-2">
+                <label for="publishDateMin">Start Date</label>
+                <input class="form-control" id="startdate" name="startdate">
+            </div>
+            <div class="form-group col-md-2 col-lg-2">
+                <label for="publishDateMax">Return Date</label>
+                <input class="form-control" id="returndate" name="returndate">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="category">Category</label>
+                <select id="category" class="form-control" name="category">
+              <option selected>Choose...</option>
+              {% for cat in cats %}
+              <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <hr />
+</main>
+
+<div class="container">
+
+    <!--Slideshow starts here -->
+    {% for product, range, nslides in allProds %}
+    <!--div class = "row"-->
+    <h1 class="my-4">{{product.0.category}}</h1>
+    <div id="demo{{forloop.counter}}" class="carousel slide my-3" data-ride="carousel">
+        <!--ul class="carousel-indicators">
+            <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li>
+            {% for i in range %}
+            <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}"></li>
+            {% endfor %}
+        </ul-->
+
+
+        <div class="col container carousel-inner no-padding">
+            <div class="carousel-item active">
+                {% for i in product %}
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <div class="card align-items-center" style="width: 18rem;">
+                        <img src='/media/{{i.image}}' class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title" id="namepr{{i.product_id}}">{{i.title}}</h5>
+                            <p class="card-text">{{i.description|slice:"0:23"}}...</p>
+
+                            {% if i.discount_value > 0 %}
+                            <p class="card-text text-success">{{i.discount_value}} per day</p>
+                            {% else %}
+                            <p id="pricepr{{i.product_id}}">{{i.value}} per day</p>
+                            {% endif %}
+                            <a href="/product/productview/{{i.product_id}}" class="btn btn-primary" id="qv{{i.product_id}}">Quickview</a>
+
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+            </div>
+            <div class="carousel-item">
+                {% endif %} {% endfor %}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- left and right controls for the slide -->
+    <!--a class="carousel-control-prev" href="#demo{{forloop.counter}}" data-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </a>
+    <a class="carousel-control-next" href="#demo{{forloop.counter}}" data-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </a-->
+
+    {% endfor %}
+</div>
+
+{% endblock %} {% block js %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!--link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"-->
+<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script>
+    $(document).ready(function() {
+        $(function() {
+            var dateToday = new Date();
+            var n = 2;
+            dateToday.setDate(dateToday.getDate() + n);
+            var dates = $("#startdate, #returndate").datepicker({
+                defaultDate: "+2d",
+                changeMonth: true,
+                numberOfMonths: 1,
+                minDate: dateToday,
+                dateFormat: 'dd MM yy',
+                onSelect: function(selectedDate) {
+                    var option = this.id == "startdate" ? "minDate" : "maxDate",
+                        instance = $(this).data("datepicker"),
+                        date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    dates.not(this).datepicker("option", option, date);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

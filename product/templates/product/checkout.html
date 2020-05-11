@@ -1,0 +1,41 @@
+{% extends 'login/basic.html' %}
+
+<!-- basic.html contains the code that is needed many times. So to escape redundancy we use template inheritance-->
+{% block title%} Title of checkout{% endblock %} {% block body %}
+<!--User can checkout only if he/she is logged in otherwise it-->
+<div class="container">
+    <div class="input-group">
+        <select class="custom-select my-3" id="inputGroupSelect04">
+            <option selected>Choose...</option>
+            <option value="1">5 inches</option>
+            <option value="2">6 inches</option>
+            <option value="3">7 inches</option>
+        </select>
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary my-3" type="button">Wrist Size</button>
+        </div>
+    </div>
+    <div class="col my-4 ">
+        <h2>Step 1 - Express Checkout - Review Your Cart Items</h2>
+        <div class="mt-4">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{product.title}}
+                    <span class="badge badge-primary badge-pill">{{product.tag_final_value}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Days
+                    <span class="badge badge-primary badge-pill">{{days}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total
+                    <span class="badge badge-primary badge-pill">{{total}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col sm-6 md-6">
+        <a class=" btn btn-outline-info" href="#">Proceed</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "login/basic.html" %} {% block body %}
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<style>
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+    
+    .carousel-indicators .active {
+        background-color: blue;
+    }
+    
+    .col-md-3 img {
+        width: 255px;
+        height: 355px;
+    }
+    
+    body .carousel-indicator li {
+        background-color: blue;
+    }
+    
+    body .carousel-indicators {
+        bottom: 0;
+    }
+    
+    body .carousel-control-prev-icon,
+    body .carousel-control-next-icon {
+        background-color: blue;
+    }
+    
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .carousel-control-next,
+    .carousel-control-prev {
+        top: auto;
+        bottom: auto;
+    }
+    
+    body .carousel-control-prev-icon,
+    body .carousel-control-next-icon {
+        background-color: blue;
+        margin-top: 222px;
+    }
+</style>
+
+
+<div class="container">
+
+    {% for product in queryset %}
+    <h1 class="my-4">{{product.category}}</h1>
+
+    <div class="col-xs-3 col-sm-3 col-md-3">
+        <div class="card align-items-center" style="width: 18rem;">
+            <img src='/media/{{product.image}}' class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title" id="namepr{{product.product_id}}">{{product.title}}</h5>
+                <p class="card-text">{{product.description|slice:"0:23"}}...</p>
+                {% if product.discount_value > 0 %}
+                <p class="card-text text-success">{{product.discount_value}} per day</p>
+                {% else %}
+                <p id="pricepr{{product.product_id}}">{{product.value}} per day</p>
+                {% endif %}
+                <a href="/product/productview/{{product.product_id}}" class="btn btn-primary" id="qv{{product.product_id}}">Quickview</a>
+
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %} {% block js %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script>
+    $(document).ready(function() {
+        $(function() {
+            var dateToday = new Date();
+            var dates = $("#startdate, #returndate").datepicker({
+                defaultDate: "+2d",
+                changeMonth: true,
+                numberOfMonths: 1,
+                minDate: dateToday,
+                onSelect: function(selectedDate) {
+                    var option = this.id == "startdate" ? "minDate" : "maxDate",
+                        instance = $(this).data("datepicker"),
+                        date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    dates.not(this).datepicker("option", option, date);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
