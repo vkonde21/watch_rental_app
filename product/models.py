@@ -1,9 +1,9 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 # Create your models here.
 from django.conf import settings
 from .managers import ProductManager
-
+from order.models import Order
 CURRENCY = settings.CURRENCY
 
 
@@ -67,8 +67,7 @@ class Booking(models.Model):
     watch = models.ForeignKey(Product, on_delete = models.CASCADE, related_name = "booking")
     initial_date = models.DateField()
     final_date = models.DateField()
-    #qty = models.PositiveIntegerField(default = 0)
+    booking_id = models.AutoField(primary_key = True)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
     
-    
-
-

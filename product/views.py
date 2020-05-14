@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from .models import Product, Booking, Category
 from math import ceil
 from django.contrib import messages
 from django.conf import settings
+from order import Checksum
+from django.views.decorators.csrf import csrf_exempt
+
 # Create your views here.
 import datetime 
    
@@ -98,7 +101,7 @@ def checkout(request):
     CURRENCY = settings.CURRENCY
     if(request.user.is_authenticated):
         if(request.method == "POST"):
-            product_id =  request.POST.get("itemsJson", "")
+            #product_id =  request.POST.get("itemsJson", "")
             name = request.POST.get("name", "")
             amount = request.POST.get("amount", "")
             email = request.POST.get("email", "")
@@ -107,8 +110,21 @@ def checkout(request):
             city = request.POST.get("city", "")
             state = request.POST.get("state", "")
             zip_code = request.POST.get("zip_code", "")
+            MERCHANT_KEY = 'UV&5KgZ6DBavlics'
+            param_dict = {
+                'MID': 'xplqWT25914630031497',
+                'ORDER_ID': str(ido),
+                'TXN_AMOUNT': str(amount),
+                'CUST_ID': email,
+                'INDUSTRY_TYPE_ID': 'Retail',
+                'WEBSITE': 'WEBSTAGING',
+                'CHANNEL_ID': 'WEB',
+   	        'CALLBACK_URL': 'http://127.0.0.1:8000/product/handlerequest',
+            }
+        # The above code is taken from here:https://github.com/Paytm-Payments/Paytm_Web_Sample_Kit_Python/blob/master/pythonKit%203.X/test.cgi
+            param_dict["CHECKSUMHASH"] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
             
-            #return render(request, "shop/paytm.html", {"param_dict":param_dict})
+            return render(request, "product/paytm.html", {"param_dict":param_dict})
         else:
             d = request.GET.get("datepickers", "")
             e = request.GET.get("datepickerr", "")
@@ -124,6 +140,7 @@ def checkout(request):
                 pre = Booking.objects.filter(watch = product[0])
                 watches = Booking.objects.filter(watch = product[0]).exclude(
                 initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte = e, final_date__gte = e).exclude(initial_date__lte = d, final_date__gte= e)
+                print(watches)
                 l = len(pre) - len(watches)
                 if(l >= product[0].original_qty or len(watches) == 0):
                     messages.error(request, "Not available between selected dates!!")
@@ -148,8 +165,15 @@ def checkout(request):
             days = (e - d).days
             total = days * p.final_value
             
-        return render (request, "product/checkout.html",{"thank":thank,"id":ido, "product":p,"days":days, "total":f'{CURRENCY} {total}',})
+        return render (request, "product/checkout.html",{"thank":thank,"id":ido, "product":p,"days":days, "total":f'{CURRENCY} {total}',"initial_date":d, "final_date":e, "amount":total})
     else:
         messages.info(request, "You need to login")
         return redirect("/product/productview/"+f"{product_id}")
+
+
+@csrf_exempt
+def handlerequest(request):
+    #pay tm will send you a post request here
+    #To check if payment is done or not
+    return HttpResponse("done")
         

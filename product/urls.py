@@ -2,13 +2,14 @@ from django.urls import path
 from loginsystem import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from product.views import homepage, productview, checkout, search
+from product.views import homepage, productview, checkout, search, handlerequest
 
 urlpatterns = [
     path('home', homepage, name="homepage"),
     path('product/productview/<int:id>', productview, name="productview"),
     path("checkout", checkout, name = " checkout"),
     path("search", search, name="search"),
+    path("product/handlerequest", handlerequest, name="handlerequest"),
 ]
 
 
