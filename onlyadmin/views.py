@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse
-from product.models import Booking
+from orderwatch.models import Booking
 from datetime import datetime
 # Create your views here.
 from django.contrib.auth.decorators import user_passes_test

@@ -3,9 +3,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 from django.conf import settings
 from .managers import ProductManager
-from order.models import Order
+from django.utils import timezone
 CURRENCY = settings.CURRENCY
-
 
 
 
@@ -58,16 +57,25 @@ class Product(models.Model):
         self.qty = qty
     tag_final_value.short_description = 'Value'
 
-class Booking(models.Model):
-    #if we get an order whose rental date clashes with the other order then change the availablity
-    #status of watch availability
-    '''On the item's model, add two datetime fields, for example "bookedStart"
-     and "bookedEnd". And have a function isBooked() that checks if a given datetime or the current datetime is in 
-    that time frame, and return True if it is, or False otherwise.'''
-    watch = models.ForeignKey(Product, on_delete = models.CASCADE, related_name = "booking")
-    initial_date = models.DateField()
-    final_date = models.DateField()
-    booking_id = models.AutoField(primary_key = True)
+class Review(models.Model):
+    RATING_CHOICES = (
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+        (5, '5'),
+    )
     user = models.ForeignKey(User, on_delete = models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
+    image = models.ImageField(default="default.jpg", upload_to = "review_pics")
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    content = models.TextField(max_length = 6000)
+    product = models.ForeignKey(Product, on_delete = models.CASCADE)
+    date_posted = models.DateField(default = timezone.now())
+    review_id = models.AutoField(primary_key = True)
+    
+'''class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    review = models.ForeignKey(Review, on_delete = models.CASCADE)
+    comment = models.TextField(max_length = 120)
+    cdate = models.DateField(default = timezone.now())'''
     

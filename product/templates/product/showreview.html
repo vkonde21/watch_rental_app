@@ -1,0 +1,169 @@
+{% extends "login/basic.html" %}
+{% block head%} 
+<link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+{% endblock%}
+{% block title %} seereviews {%endblock %}
+{% block body %}
+<style>
+body {
+  background: #fafafa;
+  color: #333333;
+  margin-top: 5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #444444;
+}
+
+ul {
+  margin: 0;
+}
+
+.bg-steel {
+  background-color: #5f788a;
+}
+
+.site-header .navbar-nav .nav-link {
+  color: #cbd5db;
+}
+
+.site-header .navbar-nav .nav-link:hover {
+  color: #ffffff;
+}
+
+.site-header .navbar-nav .nav-link.active {
+  font-weight: 500;
+}
+
+.content-section {
+  background: #ffffff;
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+.article-title {
+  color: #444444;
+}
+
+a.article-title:hover {
+  color: #428bca;
+  text-decoration: none;
+}
+
+.article-content {
+  white-space: pre-line;
+}
+
+.article-img {
+  height: 65px;
+  width: 65px;
+  margin-right: 16px;
+}
+
+.article-metadata {
+  padding-bottom: 1px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e3e3e3
+}
+
+.article-metadata a:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+.article-svg {
+  width: 25px;
+  height: 25px;
+  vertical-align: middle;
+}
+
+.account-img {
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.account-heading {
+  font-size: 2.5rem;
+}
+
+.stars-outer {
+  position: relative;
+  display: inline-block;
+}
+
+.stars-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+}
+
+.stars-outer::before {
+  content: "\f005 \f005 \f005 \f005 \f005";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: #ccc;
+}
+
+.stars-inner::before {
+  content: "\f005 \f005 \f005 \f005 \f005";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: #f8ce0b;
+}
+
+</style>
+    {% for r in reviews %}
+    <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ r.user.profile.image.url }}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="#">{{ r.user }}</a>
+              <small class="text-muted">{{ r.date_posted|date:"F d, Y" }}</small>
+            </div>
+            <!--h2><a class="article-title" href="#">{{ post.title }}</a></h2-->
+            <div class="stars-outer" id="stars-outer{{r.review_id}}">
+                <div class="stars-inner" id="stars-inner{{r.review_id}}">
+                </div>
+            </div>
+            
+            <p class="article-content">{{ r.rating }}</p>
+            <p class="article-content">{{ r.content }}</p>
+          </div>
+        </article>
+    
+    <script >
+// Initial Ratings
+    var rating = {{r.rating}}
+    var id  =  {{r.review_id}}
+    // Total Stars
+    var starsTotal = 5;
+
+    // Run getRatings when DOM loads
+    //document.addEventListener('DOMContentLoaded', getRatings);
+    // Get ratings
+    (function () {
+      
+        // Get percentage
+        var starPercentage = (rating / starsTotal) * 100;
+
+        // Round to nearest 10
+        var starPercentageRounded = `${Math.round(starPercentage / 10) * 10}%`;
+
+        // Set width of stars-inner to percentage
+        document.querySelector(`#stars-inner` + id).style.width = starPercentageRounded;
+        console.log(`.stars-inner` + id);
+
+        // Add number rating
+        //document.querySelector(`.number-rating`).innerHTML = rating;
+    })();
+</script>
+{% endfor%}
+{% endblock %}

@@ -3,7 +3,7 @@
 <!-- basic.html contains the code that is needed many times. So to escape redundancy we use temp inheritance-->
 {% block title%} {{product.title}} Watch{% endblock %} {% block body %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<h3>{{product.title}}</h3>
+<h3 id="ptitle">{{product.title}}</h3>
 <div class="container my-4">
     <div class="row my-4">
         <!--we need to add this div so that image is displayed on left side and description on right side-->
@@ -21,12 +21,9 @@
             <h2>Discount MRP:</h2>
             <p class="card-text text-success">{{product.discount_value}} per day</p>
             {% else %}
-            <p >{{product.value}} per day</p>
+            <p>{{product.value}} per day</p>
             {% endif %}
             <p>{{product.description}}</p>
-
-            <!--div class="row">
-            <div class="col-md-8"-->
 
 
             <form action="/checkout">
@@ -41,12 +38,22 @@
             </form>
 
         </div>
+        
+        <div class="col md-4 my-5">
+            <a class="btn btn-outline-success btn-lg" href="/showreview/{{product.product_id}}">User Reviews</a>
+        </div>
+        <div class="col md-8 my-5">
+            <a class="btn btn-outline-success btn-lg" href="/review/{{product.product_id}}">Write a Review</a>
+        </div>
+
+        </div>
+
+
     </div>
 
     {% endblock %} {% block js %}
-    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <!--link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"-->
     <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
     <script>
         $(document).ready(function() {

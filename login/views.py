@@ -4,7 +4,8 @@ from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from orderwatch.models import Booking
+from django.contrib.auth import logout
 # Create your views here.
 def register(request):
     form = UserRegisterForm()
@@ -50,4 +51,19 @@ def profile(request):
         p_form = ProfileUpdateForm(instance = request.user.profile)
     context = {"p_form":p_form, "u_form":u_form}
     return render(request,'login/profile.html',context)
+
+def logout1(request):
+    #print(request.user)
+    try:
+        #It might happen that a customer books a watch but does not place an order.
+        #In that case the booking gets deleted when the customer logs out
+        b = Booking.objects.get(user=request.user, order__isnull = True)
+        #print(b)
+        if(b is not None):
+            b.delete()
+    except:
+        pass
+    logout(request)
+    messages.info(request, "Logged out successfully!")
+    return redirect("/home")
 

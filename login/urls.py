@@ -1,6 +1,6 @@
 
 from django.urls import path
-from login.views import register,basic,profile
+from login.views import register,basic,profile, logout1
 from loginsystem import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -9,7 +9,7 @@ urlpatterns = [
     path('', basic,name = "basic"),
     path('register/', register, name = "register"),
     path('login/', auth_views.LoginView.as_view(template_name = 'login/login.html'), name="login"),
-    path('logout/', auth_views.LogoutView.as_view(template_name = 'login/logout.html'), name="logout"),
+    path('logout/', logout1 , name="logout"),
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='login/password_reset.html'), name="reset"),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
