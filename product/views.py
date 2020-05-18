@@ -78,11 +78,25 @@ def search(request):
     elif(is_valid_queryparam(date_max)):
         messages.error(request, "Please select start date")
         redirect("/homepage")
-
-            
     
-    params = {"queryset":qs}
-    return render(request, "product/search.html", params)
+    catprods = Product.objects.values("category", "product_id")
+    cats = {item["category"] for item in catprods}
+    categories = Category.objects.values("title")
+    category = [c["title"] for c in categories]
+    params = {"cats": category,
+              "queryset": qs, "search": 1}
+    prods = {}
+    if(len(qs) == 0):
+        params["pmessage"] = "Sorry, no search results found for your query"
+    else:
+        cats = Category.objects.all()
+        for cat in cats:
+            q = qs.filter(category = cat)
+            if(q.count() != 0):
+                prods[cat.title] = q
+        print(prods)
+    params["prods"] = prods
+    return render(request, "product/homepage.html", params)
 
 def homepage(request):
     thanks = True
@@ -98,7 +112,7 @@ def homepage(request):
         nslides = n//4 + ceil((n/4) - (n//4))
         allProds.append([prod, range(1, nslides), nslides])
 
-    params = {"allProds": allProds, "cats":category}
+    params = {"allProds": allProds, "cats":category, "search":0}
     return render(request, "product/homepage.html", params)
 
 def productview(request, id):
@@ -214,15 +228,15 @@ def review(request, id):
         try:
             r = Review.objects.get(
                         user=request.user, product__product_id=id)
-
+            print(r)
             if(r is not None):
-                form = ReviewUpdateForm(instance=r, data=request.POST)
+                form = ReviewUpdateForm(request.POST, request.FILES, instance = r)
                 a = form.save(commit=False)
                 k = 1
         except:
             pass
         if( k == 0):
-            form = ReviewForm(request.POST)
+            form = ReviewForm(request.POST, request.FILES)
             a = form.save(commit=False)
         a.user = request.user
         a.product = Product.objects.get(product_id = id)

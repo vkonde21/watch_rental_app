@@ -63,6 +63,11 @@ a.article-title:hover {
   margin-right: 16px;
 }
 
+.review-img{
+  height: 200px;
+  width: 200px;
+}
+
 .article-metadata {
   padding-bottom: 1px;
   margin-bottom: 4px;
@@ -120,6 +125,7 @@ a.article-title:hover {
 }
 
 </style>
+<div class="container mt-3">
     {% for r in reviews %}
     <article class="media content-section">
           <img class="rounded-circle article-img" src="{{ r.user.profile.image.url }}">
@@ -134,8 +140,12 @@ a.article-title:hover {
                 </div>
             </div>
             
-            <p class="article-content">{{ r.rating }}</p>
-            <p class="article-content">{{ r.content }}</p>
+            {% if r.image.url == "/media/default.jpg"%}
+              <p class="article-content">{{ r.content }}</p>
+            {% else %}
+              <p class="article-content">{{ r.content }}</p>
+              <img class = "review-img" src = "{{r.image.url}}">
+            {% endif %}
           </div>
         </article>
     
@@ -159,11 +169,8 @@ a.article-title:hover {
 
         // Set width of stars-inner to percentage
         document.querySelector(`#stars-inner` + id).style.width = starPercentageRounded;
-        console.log(`.stars-inner` + id);
-
-        // Add number rating
-        //document.querySelector(`.number-rating`).innerHTML = rating;
     })();
 </script>
 {% endfor%}
+</div>
 {% endblock %}

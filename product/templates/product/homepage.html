@@ -95,6 +95,7 @@
     <hr />
 </main>
 
+{% if search == 0 %}
 <div class="container">
 
     <!--Slideshow starts here -->
@@ -151,6 +152,41 @@
     {% endfor %}
 </div>
 
+{% else %}
+
+<div class="container">
+
+{% if pmessage %}
+<div class="col-md-4">
+<div class="alert alert-error">{{ pmessage }}</div>
+</div>
+
+{% else %}
+
+    {% for product, value in prods.items %}
+    <h1 class="my-4">{{product}}</h1>
+    {% for p in value%}
+    <div class="col-xs-3 col-sm-3 col-md-3">
+        <div class="card align-items-center" style="width: 18rem;">
+            <img src='/media/{{p.image}}' class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title" id="namepr{{p.product_id}}">{{p.title}}</h5>
+                <p class="card-text">{{p.description|slice:"0:23"}}...</p>
+                {% if p.discount_value > 0 %}
+                <p class="card-text text-success">{{p.discount_value}} per day</p>
+                {% else %}
+                <p id="pricepr{{p.product_id}}">{{p.value}} per day</p>
+                {% endif %}
+                <a href="/product/productview/{{p.product_id}}" class="btn btn-primary" id="qv{{p.product_id}}">Quickview</a>
+
+            </div>
+        </div>
+    </div>
+    {% endfor%}
+    {% endfor %}
+{% endif %}
+</div>
+{% endif %}
 {% endblock %} {% block js %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
