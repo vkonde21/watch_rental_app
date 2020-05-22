@@ -23,7 +23,7 @@ def register(request):
     return render(request, 'login/register.html',{"form":form})
     
 def basic(request):
-    return render(request, "login/basic.html")
+    return redirect("/home")
 
 @login_required
 def profile(request):

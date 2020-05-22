@@ -2,7 +2,7 @@ from django.forms import ModelForm, Textarea
 from django import forms
 from .models import Review
 
-RATING_CHOICES = (
+RATING_CHOICES = ((0,'0'),
     (1, '1'),
     (2, '2'),
     (3, '3'),

@@ -9,8 +9,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from .forms import ReviewForm, ReviewUpdateForm
 from django.views.generic import ListView, DetailView
+from django.db.models import Q
+
 # Create your views here.
 import datetime 
+import json
 
 b_id = 0
 '''def checkbooking(bookid):
@@ -28,19 +31,38 @@ def convert(date_time):
 def is_valid_queryparam(param):
     return param != '' and param is not None
 
+def update(id):
+    prod = Product.objects.get(product_id=id)
+    reviews = Review.objects.filter(product__product_id=id)
+    c = reviews.count()
+    r = [0, 1, 2, 3, 4, 5]
+    s = 0
+    if(c != 0):
+        for k in reviews:
+            s = s + k.rating
+        average = round(s/c, 2)
+        prod.rating = average
+        prod.save()
+
 def search(request):
     qs = Product.objects.all()
     categories = Category.objects.all()
     title_contains_query = request.GET.get('title')
     minrent = request.GET.get('minrent')
     maxrent = request.GET.get('maxrent')
-    date_min = request.GET.get('startdate')
-    date_max = request.GET.get('returndate')
-    category = request.GET.get('category')
-    if(category == "Choose..."):
-        category = ""
+    d_min = request.GET.get('startdate')
+    d_max = request.GET.get('returndate')
+    cate = request.GET.get('category')
+    rating = request.GET.get('rate')
+    #print(type(rating))
+    if(cate == "Choose..."):
+        cate = ""
+
+    if(rating == "Choose Rating..."):
+        rating = ""
     if is_valid_queryparam(title_contains_query):
-        qs = qs.filter(title__icontains=title_contains_query)
+        qs = qs.filter(Q(title__icontains=title_contains_query) | Q(description__icontains = title_contains_query))
+        
 
     if(is_valid_queryparam(minrent)):
         qs = qs.filter(final_value__gte = minrent)
@@ -48,13 +70,17 @@ def search(request):
     if(is_valid_queryparam(maxrent)):
         qs = qs.filter(final_value__lte = maxrent)
 
-    if(is_valid_queryparam(category)):
-        c = Category.objects.filter(title = category)
-        qs = qs.filter(category = c[0].id)
+    if(is_valid_queryparam(cate)):
+        c = Category.objects.filter(title = cate)
+        if(c is not None):
+            qs = qs.filter(category = c[0].id)
+
+    if(is_valid_queryparam(rating)):
+        qs = qs.filter(rating__gte = rating)
     
-    if(is_valid_queryparam(date_min) and is_valid_queryparam(date_max)):
-        date_min = datetime.datetime.strptime(date_min, "%d %B %Y").date()
-        date_max = datetime.datetime.strptime(date_max, "%d %B %Y").date()
+    if(is_valid_queryparam(d_min) and is_valid_queryparam(d_max)):
+        date_min = datetime.datetime.strptime(d_min, "%d %B %Y").date()
+        date_max = datetime.datetime.strptime(d_max, "%d %B %Y").date()
         q = qs.filter(qty__gte = 1)
         b = Booking.objects.exclude(
             initial_date__gte=date_min, final_date__lte=date_max).exclude(
@@ -71,11 +97,11 @@ def search(request):
                 if(book.watch not in qs):
                     qs.append(book.watch)
 
-    elif(is_valid_queryparam(date_min)):
+    elif(is_valid_queryparam(d_min)):
         messages.error(request, "Please select return date")
         redirect("/homepage")
 
-    elif(is_valid_queryparam(date_max)):
+    elif(is_valid_queryparam(d_max)):
         messages.error(request, "Please select start date")
         redirect("/homepage")
     
@@ -85,16 +111,27 @@ def search(request):
     category = [c["title"] for c in categories]
     params = {"cats": category,
               "queryset": qs, "search": 1}
+    params["title"] = title_contains_query
+    params["minrent"] = minrent
+    params["maxrent"] = maxrent
+    params["startdate"] = d_min
+    params["returndate"] = d_max
+    params["cate"] = cate
+    params["rating"] = rating
     prods = {}
     if(len(qs) == 0):
         params["pmessage"] = "Sorry, no search results found for your query"
     else:
         cats = Category.objects.all()
+        ids = []
+        for l in qs:
+            ids.append(l.product_id)
+        qs = Product.objects.filter(product_id__in = ids)
         for cat in cats:
             q = qs.filter(category = cat)
             if(q.count() != 0):
                 prods[cat.title] = q
-        print(prods)
+        #print(prods)
     params["prods"] = prods
     return render(request, "product/homepage.html", params)
 
@@ -118,7 +155,26 @@ def homepage(request):
 def productview(request, id):
     #Fetch the product by its id
     prod = Product.objects.filter(product_id = id)
-    return render (request, "product/productview.html", {"product": prod[0]})
+    reviews = Review.objects.filter(product__product_id=id)
+    c = reviews.count()
+    r = [0, 1, 2, 3, 4, 5]
+    params = {}
+    s = 0
+    for v in r:
+        q = reviews.filter(rating=v)
+        params["r" + str(v)] = q.count()
+        s = s + q.count() * v
+    params["product"] = prod[0]
+    print(params)
+    if(c == 0):
+        params["rmessage"] = "No reviews for this product yet"
+        params["average"] = 0
+        params["totalr"] = 0
+    else:
+        params["rmessage"] = ""
+        params["average"] = round(s / c, 1)
+        params["totalr"] = c
+    return render (request, "product/productview.html", params)
 
 def checkout(request):
     thank = False
@@ -206,7 +262,7 @@ def checkout(request):
                 b_id = b.booking_id
             days = (e - d).days
             total = days * p.final_value
-            
+            print(b_id)
         return render (request, "product/checkout.html",{"thank":thank,"id":ido, "product":p,"days":days, "total":f'{CURRENCY} {total}',"initial_date":d, "final_date":e, "amount":total})
     else:
         messages.info(request, "You need to login")
@@ -217,18 +273,17 @@ def checkout(request):
 def handlerequest(request):
     #pay tm will send you a post request here
     #To check if payment is done or not
-    return HttpResponse("done")
+    messages.success(request, "Order placed successfully")
+    return redirect("/home")
 
 
 def review(request, id):
     k = 0
     if(request.method == "POST"):
         #while saving the form 
-        
         try:
             r = Review.objects.get(
                         user=request.user, product__product_id=id)
-            print(r)
             if(r is not None):
                 form = ReviewUpdateForm(request.POST, request.FILES, instance = r)
                 a = form.save(commit=False)
@@ -241,6 +296,8 @@ def review(request, id):
         a.user = request.user
         a.product = Product.objects.get(product_id = id)
         a.save()
+        #Update product.rating which is the average rating
+        update(id)
         return redirect("/product/productview/" + f"{id}")
     else:
         if(request.user.is_authenticated):
@@ -269,11 +326,13 @@ def review(request, id):
 
 def showreview(request, id):
     reviews = Review.objects.filter(product__product_id = id)
+    
     #print(reviews)
     if(len(reviews) == 0):
         messages.info(request, "No reviews for this product till date")   
         return redirect("/product/productview/"+f"{id}")
     else:
+        
         return render(request, "product/showreview.html", {"id":id, "reviews":reviews})
     
 
@@ -286,4 +345,19 @@ def showreview(request, id):
 
 class ReviewDetailView(DetailView):
     model = Review'''
+
+
+def autocompleteModel(request):
+    if request.is_ajax():
+        q = request.GET.get('term', '').capitalize()
+        search_qs = Product.objects.filter(Q(title__startswith=q) |Q(description__icontains = q))
+        results = []
+        print (q)
+        for r in search_qs:
+            results.append(r.title)
+        data = json.dumps(results)
+    else:
+        data = 'fail'
+    mimetype = 'application/json'
+    return HttpResponse(data, mimetype)
     

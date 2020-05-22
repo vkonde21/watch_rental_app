@@ -126,6 +126,9 @@ a.article-title:hover {
 
 </style>
 <div class="container mt-3">
+<!--show average user rating-->
+
+
     {% for r in reviews %}
     <article class="media content-section">
           <img class="rounded-circle article-img" src="{{ r.user.profile.image.url }}">

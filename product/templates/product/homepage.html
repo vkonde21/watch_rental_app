@@ -46,15 +46,12 @@
     }
 </style>
 
-
-<!--h1>VAISHNAVI</h1-->
-
 <main role="main" class="container my-3">
     <form action="search">
         <div class="form-row">
-            <div class="form-group col-12">
+            <div class="form-group col-5">
                 <div class="input-group">
-                    <input class="form-control py-2 border-right-0 border" type="search" name="title" placeholder="Product Name..." />
+                    <input class="form-control py-2 border-right-0 border" type="search" name="title" value="{{title}}" id="title" />
                     <span class="input-group-append">
                         <div class="input-group-text bg-transparent">
                             <i class="fa fa-search"></i>
@@ -62,27 +59,37 @@
                     </span>
                 </div>
             </div>
+
+            <div class="form-group  mx-2 col-4">
+                <select id="rating" class="form-control" value="" name="rate">
+                    <option selected>Choose Rating...</option>
+                    <option value="1">1 & above</option>
+                    <option value="2">2 & above</option>
+                    <option value="3">3 & above</option>
+                    <option value="4">4 & above</option>
+                </select>
+            </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-2 col-lg-2">
                 <label for="viewCountMin">Minimum Rent</label>
-                <input type="number" min=0 class="form-control" id="MinRent" placeholder="0" name="minrent">
+                <input type="number" min=0 class="form-control" id="MinRent" value="{{minrent}}" name="minrent">
             </div>
             <div class="form-group col-md-2 col-lg-2">
                 <label for="viewCountMax">Maximum Rent</label>
-                <input type="number" min=0 class="form-control" id="MaxRent" name="maxrent">
+                <input type="number" min=0 class="form-control" id="MaxRent" value="{{maxrent}}" name="maxrent">
             </div>
             <div class="form-group col-md-2 col-lg-2">
                 <label for="publishDateMin">Start Date</label>
-                <input class="form-control" id="startdate" name="startdate">
+                <input class="form-control" id="startdate" value="{{startdate}}" name="startdate">
             </div>
             <div class="form-group col-md-2 col-lg-2">
                 <label for="publishDateMax">Return Date</label>
-                <input class="form-control" id="returndate" name="returndate">
+                <input class="form-control" id="returndate" value="{{returndate}}" name="returndate">
             </div>
             <div class="form-group col-md-4">
                 <label for="category">Category</label>
-                <select id="category" class="form-control" name="category">
+                <select id="category" class="form-control" value="{{cate}}" name="category">
               <option selected>Choose...</option>
               {% for cat in cats %}
               <option value="{{ cat }}">{{ cat }}</option>
@@ -98,19 +105,11 @@
 {% if search == 0 %}
 <div class="container">
 
-    <!--Slideshow starts here -->
+
     {% for product, range, nslides in allProds %}
     <!--div class = "row"-->
     <h1 class="my-4">{{product.0.category}}</h1>
     <div id="demo{{forloop.counter}}" class="carousel slide my-3" data-ride="carousel">
-        <!--ul class="carousel-indicators">
-            <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li>
-            {% for i in range %}
-            <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}"></li>
-            {% endfor %}
-        </ul-->
-
-
         <div class="col container carousel-inner no-padding">
             <div class="carousel-item active">
                 {% for i in product %}
@@ -156,14 +155,12 @@
 
 <div class="container">
 
-{% if pmessage %}
-<div class="col-md-4">
-<div class="alert alert-error">{{ pmessage }}</div>
-</div>
+    {% if pmessage %}
+    <div class="col-md-4">
+        <div class="alert alert-error">{{ pmessage }}</div>
+    </div>
 
-{% else %}
-
-    {% for product, value in prods.items %}
+    {% else %} {% for product, value in prods.items %}
     <h1 class="my-4">{{product}}</h1>
     {% for p in value%}
     <div class="col-xs-3 col-sm-3 col-md-3">
@@ -182,12 +179,9 @@
             </div>
         </div>
     </div>
-    {% endfor%}
-    {% endfor %}
-{% endif %}
+    {% endfor%} {% endfor %} {% endif %}
 </div>
-{% endif %}
-{% endblock %} {% block js %}
+{% endif %} {% endblock %} {% block js %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <!--link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"-->
@@ -211,6 +205,18 @@
                     dates.not(this).datepicker("option", option, date);
                 }
             });
+        });
+    });
+
+    $(document).ready(function() {
+        $("#title").autocomplete({
+            source: "/ajax_calls/search/",
+            minLength: 2,
+            open: function() {
+                setTimeout(function() {
+                    $('.ui-autocomplete').css('z-index', 99);
+                }, 0);
+            }
         });
     });
 </script>
