@@ -4,12 +4,13 @@ from orderwatch.models import Booking, OrderWatch
 from math import ceil
 from django.contrib import messages
 from django.conf import settings
-from . import Checksum
 from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import send_mail
 from .forms import ReviewForm, ReviewUpdateForm
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
+from django.core import mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 # Create your views here.
 import datetime 
@@ -200,23 +201,15 @@ def checkout(request):
             b.save()
             l = []
             l.append(request.user.email)
-            send_mail(
-                'order details', f"Your order id is{order.order_id}",'kdprasad0036@gmail.com', l)
-            MERCHANT_KEY = 'UV&5KgZ6DBavlics'
-            param_dict = {
-                'MID': 'xplqWT25914630031497',
-                'ORDER_ID': str(ido),
-                'TXN_AMOUNT': str(amount),
-                'CUST_ID': email,
-                'INDUSTRY_TYPE_ID': 'Retail',
-                'WEBSITE': 'WEBSTAGING',
-                'CHANNEL_ID': 'WEB',
-   	        'CALLBACK_URL': 'http://127.0.0.1:8000/product/handlerequest',
-            }
-        # The above code is taken from here:https://github.com/Paytm-Payments/Paytm_Web_Sample_Kit_Python/blob/master/pythonKit%203.X/test.cgi
-            param_dict["CHECKSUMHASH"] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
+            html_message = render_to_string(
+                'product/mail_template.html', {'order_id': order.order_id})
+            plain_message = strip_tags(html_message)
+            mail.send_mail(
+                'order details', plain_message, 'pplwatch9@gmail.com', l, html_message=html_message)
             
-            return render(request, "product/paytm.html", {"param_dict":param_dict})
+            messages.success(request, "Order placed successfully.Check your email for further detials")
+            return redirect("/home")
+            
         else:
             d = request.GET.get("datepickers", "")
             e = request.GET.get("datepickerr", "")
@@ -268,13 +261,6 @@ def checkout(request):
         messages.info(request, "You need to login")
         return redirect("/product/productview/"+f"{product_id}")
 
-
-@csrf_exempt
-def handlerequest(request):
-    #pay tm will send you a post request here
-    #To check if payment is done or not
-    messages.success(request, "Order placed successfully")
-    return redirect("/home")
 
 
 def review(request, id):
@@ -335,17 +321,6 @@ def showreview(request, id):
         
         return render(request, "product/showreview.html", {"id":id, "reviews":reviews})
     
-
-'''class ReviewListView(ListView):
-    #<app>/<model>_<viewtype>.html
-    model = Review 
-    template_name = "product/showreview.html"
-    context_object_name = 'reviews'
-    ordering = ['-date_posted'] #- for newest to oldest
-
-class ReviewDetailView(DetailView):
-    model = Review'''
-
 
 def autocompleteModel(request):
     if request.is_ajax():
