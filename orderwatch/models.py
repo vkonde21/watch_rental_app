@@ -9,25 +9,9 @@ from product.models import Product
 from django.contrib.auth.models import User
 from decimal import Decimal
 from django.contrib.auth.models import UserManager
+from cart.models import Cart, BookingCart, OrderWatch
 CURRENCY = settings.CURRENCY
 
-
-class OrderWatch(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE)
-    ordered_date = models.DateTimeField(default=timezone.now())
-    order_id = models.AutoField(primary_key=True)
-    amount = models.IntegerField(default=0)  
-    name = models.CharField(max_length=90)
-    email = models.CharField(max_length=90)
-    phone = models.CharField(max_length=13)
-    address = models.CharField(max_length=300) 
-    state = models.CharField(max_length=90)
-    city = models.CharField(max_length=90)
-    zip_code = models.CharField(max_length=90)
-    objects = UserManager()
-    def __str__(self):
-        return self.user.username
 
 
 class Booking(models.Model):
@@ -40,10 +24,17 @@ class Booking(models.Model):
         Product, on_delete=models.CASCADE, related_name="booking")
     initial_date = models.DateField()
     final_date = models.DateField()
+    days = models.PositiveIntegerField(default = 0)
     booking_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(OrderWatch, on_delete=models.CASCADE, null=True)
-    objects = UserManager()
+    bcart = models.ForeignKey(BookingCart, on_delete = models.CASCADE, null = True)
+    total = models.DecimalField(default=0.00, max_digits=10, decimal_places=2) #total here refers to amount fr each booking betw chosen dates
+    status = models.CharField(max_length = 12, default="noorder")
+    #no order means no order has been placed for a booking
+    #cancelled means booking cancelled
+    #delivered means booking has been done and delivered & return date is over
+    #placed means order has been placed
     
 
     

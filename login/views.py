@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from orderwatch.models import Booking
 from django.contrib.auth import logout
+from cart.models import Cart
 # Create your views here.
 def register(request):
     form = UserRegisterForm()

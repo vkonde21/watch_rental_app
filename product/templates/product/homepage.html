@@ -121,9 +121,9 @@
                             <p class="card-text">{{i.description|slice:"0:23"}}...</p>
 
                             {% if i.discount_value > 0 %}
-                            <p class="card-text text-success">{{i.discount_value}} per day</p>
+                            <p class="card-text text-success">{{currency}} {{i.discount_value}} per day</p>
                             {% else %}
-                            <p id="pricepr{{i.product_id}}">{{i.value}} per day</p>
+                            <p id="pricepr{{i.product_id}}">{{currency}} {{i.value}} per day</p>
                             {% endif %}
                             <a href="/product/productview/{{i.product_id}}" class="btn btn-primary" id="qv{{i.product_id}}">Quickview</a>
 
@@ -170,9 +170,9 @@
                 <h5 class="card-title" id="namepr{{p.product_id}}">{{p.title}}</h5>
                 <p class="card-text">{{p.description|slice:"0:23"}}...</p>
                 {% if p.discount_value > 0 %}
-                <p class="card-text text-success">{{p.discount_value}} per day</p>
+                <p class="card-text text-success">{{currency}}{{p.discount_value}} per day</p>
                 {% else %}
-                <p id="pricepr{{p.product_id}}">{{p.value}} per day</p>
+                <p id="pricepr{{p.product_id}}">{{currency}}{{p.value}} per day</p>
                 {% endif %}
                 <a href="/product/productview/{{p.product_id}}" class="btn btn-primary" id="qv{{p.product_id}}">Quickview</a>
 

@@ -1,40 +1,38 @@
-{% extends 'login/basic.html' %}
-{% block head%} 
+{% extends 'login/basic.html' %} {% block head%}
 <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-{% endblock%}
-<!-- basic.html contains the code that is needed many times. So to escape redundancy we use temp inheritance-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> {% endblock%}
+
 {% block title%} {{product.title}} Watch{% endblock %} {% block body %}
 
 <style>
-.stars-outer {
-  position: relative;
-  display: inline-block;
-}
-
-.stars-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-}
-
-.stars-outer::before {
-  content: "\f005 \f005 \f005 \f005 \f005";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: #ccc;
-}
-
-.stars-inner::before {
-  content: "\f005 \f005 \f005 \f005 \f005";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: #f8ce0b;
-}
+    .stars-outer {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .stars-inner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 0;
+    }
+    
+    .stars-outer::before {
+        content: "\f005 \f005 \f005 \f005 \f005";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #ccc;
+    }
+    
+    .stars-inner::before {
+        content: "\f005 \f005 \f005 \f005 \f005";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #f8ce0b;
+    }
 </style>
 <h3 id="ptitle">{{product.title}}</h3>
 <div class="container my-4">
@@ -47,14 +45,14 @@
 
         </div>
         <div class="col-md-8">
-
+            <h4>Deposit: {{currency}}{{product.deposit}}</h4>
             {% if product.discount_value > 0 %}
-            <h2>MRP:</h2>
-            <p><s>{{product.value}}</s>per day</p>
-            <h2>Discount MRP:</h2>
-            <p class="card-text text-success">{{product.discount_value}} per day</p>
+            <h2>Rent:</h2>
+            <p><s>{{currency}}{{product.value}}</s>per day</p>
+            <h2>Discount Rent:</h2>
+            <p class="card-text text-success">{{currency}}{{product.discount_value}} per day</p>
             {% else %}
-            <p>{{product.value}} per day</p>
+            <h4>Rent: {{currency}}{{product.value}} per day</h4>
             {% endif %}
             <p>{{product.description}}</p>
 
@@ -68,6 +66,7 @@
                 <input id="datepickerr" name="datepickerr" data-provide="datepicker">
                 <BR>
                 <button type="submit" class="btn btn-primary">Apply</button>
+                <a class="btn btn-primary" href="/addtocart/{{product.product_id}}">Add to Cart</a>
             </form>
 
         </div>
@@ -80,44 +79,43 @@
                 <div class="stars-inner" id="stars-inner">
                 </div>
             </div>
-            <h5 style="display:inline-block;">  {{average}}</h5>
+            <h5 style="display:inline-block;"> {{average}}</h5>
             <h5>{{totalr}} reviews</h5>
             <div class="row my-3 mx-2">
-            <h4 >5 star </h4>
-            <div class="progress mx-2" style="border: 1px solid black; height:20px;width:180px">
-            <div class="progress-bar bg-success" role="progressbar" style="width: {% widthratio r5 totalr 100 %}%; " aria-valuenow="{{r5}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r5}}</div>
-            </div>  
+                <h4>5 star </h4>
+                <div class="progress mx-2" style="border: 1px solid black; height:20px;width:180px">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {% widthratio r5 totalr 100 %}%; " aria-valuenow="{{r5}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r5}}</div>
+                </div>
             </div>
 
             <div class="row my-3 mx-2">
-            <h4>4 star </h4>
-            <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
-            <div class="progress-bar" role="progressbar" style="width: {% widthratio r4 totalr 100 %}%; " aria-valuenow="{{r4}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r4}}</div>
-            </div>  
+                <h4>4 star </h4>
+                <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
+                    <div class="progress-bar" role="progressbar" style="width: {% widthratio r4 totalr 100 %}%; " aria-valuenow="{{r4}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r4}}</div>
+                </div>
             </div>
-            
+
             <div class="row my-3 mx-2">
-            <h4>3 star </h4>
-            <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
-            <div class="progress-bar bg-info" role="progressbar" style="width: {% widthratio r3 totalr 100 %}%; " aria-valuenow="{{r3}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r3}}</div>
-            </div> 
+                <h4>3 star </h4>
+                <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {% widthratio r3 totalr 100 %}%; " aria-valuenow="{{r3}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r3}}</div>
+                </div>
             </div>
-            
-             <div class="row my-3 mx-2">  
-             <h4 >2 star </h4> 
-            <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
-            <div class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio r2 totalr 100 %}%; " aria-valuenow="{{r2}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r2}}</div>
-            </div>  
+
+            <div class="row my-3 mx-2">
+                <h4>2 star </h4>
+                <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio r2 totalr 100 %}%; " aria-valuenow="{{r2}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r2}}</div>
+                </div>
             </div>
 
             <div class="row my-3 mx-2 ">
-            <h4>1 star </h4>
-            <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
-            <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio r1 totalr 100 %}%; " aria-valuenow="{{r1}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r1}}</div>
-            </div> 
-            </div> 
-        </div><br>
-        {% endif %}
+                <h4>1 star </h4>
+                <div class="progress mx-2" style="border: 1px solid black;height:20px;width:180px">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio r1 totalr 100 %}%; " aria-valuenow="{{r1}}" aria-valuemin="0" aria-valuemax="{{totalr}}">{{r1}}</div>
+                </div>
+            </div>
+        </div><br> {% endif %}
         <div class="col md-4 my-5 mx-5">
             <a class="btn btn-outline-success btn-lg" href="/showreview/{{product.product_id}}">User Reviews</a>
         </div>
@@ -125,46 +123,46 @@
             <a class="btn btn-outline-success btn-lg" href="/review/{{product.product_id}}">Write a Review</a>
         </div>
 
-        </div>
-
-
     </div>
 
-    {% endblock %} {% block js %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
-    <script>
-        $(document).ready(function() {
-            $(function() {
-                var dateToday = new Date();
-                var n = 2;
-                dateToday.setDate(dateToday.getDate() + n);
-                var dates = $("#datepickers, #datepickerr").datepicker({
-                    defaultDate: "+2d",
-                    changeMonth: true,
-                    numberOfMonths: 1,
-                    minDate: dateToday,
-                    dateFormat: 'dd MM yy',
-                    onSelect: function(selectedDate) {
-                        var option = this.id == "datepickers" ? "minDate" : "maxDate",
-                            instance = $(this).data("datepicker"),
-                            date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
-                        dates.not(this).datepicker("option", option, date);
-                    }
-                });
+
+</div>
+
+{% endblock %} {% block js %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script>
+    $(document).ready(function() {
+        $(function() {
+            var dateToday = new Date();
+            var n = 2;
+            dateToday.setDate(dateToday.getDate() + n);
+            var dates = $("#datepickers, #datepickerr").datepicker({
+                defaultDate: "+2d",
+                changeMonth: true,
+                numberOfMonths: 1,
+                minDate: dateToday,
+                dateFormat: 'dd MM yy',
+                onSelect: function(selectedDate) {
+                    var option = this.id == "datepickers" ? "minDate" : "maxDate",
+                        instance = $(this).data("datepicker"),
+                        date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    dates.not(this).datepicker("option", option, date);
+                }
             });
         });
+    });
 
-        var item = {{product.product_id}}
-        $("#item").val(item)
-        
-        {% if rmessage == ""%}
-        var rating = {{average}};
-    
-        (function () {
-        
-             var starPercentage = (rating / 5) * 100;
+    var item = {{product.product_id}}
+    $("#item").val(item)
+    console.log(item)
+    {% if rmessage == "" %}
+    var rating = {{average}};
+
+    (function() {
+
+        var starPercentage = (rating / 5) * 100;
 
         // Round to nearest 10
         var starPercentageRounded = `${Math.round(starPercentage / 10) * 10}%`;
@@ -172,7 +170,7 @@
         // Set width of stars-inner to percentage
         document.querySelector(`#stars-inner`).style.width = starPercentageRounded;
         console.log(starPercentageRounded)
-        })();
+    })(); 
     {% endif %}
-    </script>
-    {% endblock %}
+</script>
+{% endblock %}

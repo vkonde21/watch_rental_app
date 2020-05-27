@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'product',
     'crispy_forms',
     'django_cleanup',
-    'django_tables2',
+    'cart'
 ]
 
 CURRENCY = '₹'

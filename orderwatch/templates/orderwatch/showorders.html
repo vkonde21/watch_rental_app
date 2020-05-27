@@ -1,30 +1,32 @@
-{% extends "login/basic.html" %} {% block title %}showorders {% endblock %} {% block body %} 
+{% extends "login/basic.html" %} {% block title %}showorders {% endblock %} {% block body %}
 
 
-<table class="table table-dark my-3">
-  <thead>
-    <tr class="bg-success">
-      <th scope="col">Order_id</th>
-      <th scope="col">Product</th>
-      <th scope="col"></th>
-      <th scope="col">Ordered_date</th>
-      <th scope="col">Start Date</th>
-      <th scope="col">Return Date</th>
+        {% for o,val in orders.items%}
+        {% for value in val %}
+        <!--tr>
+            <th scope="row">{{o.order_id}}</th>
+            <td>{{value.watch.title}}</td>
+            <td>{{o.ordered_date}}</td>
+            <td>{{value.initial_date}}</td>
+            <td>{{value.final_date}}</td>
+            <td><a href="/cancel_order/{{o.order_id}}">Cancel Order</a></td>
 
-    </tr>
-  </thead>
-  <tbody>
-    {% for o,value in orders.items%}
-    <tr>
-      <th scope="row">{{o.order_id}}</th>
-      <td>{{value.watch.title}}</td>
-      <td><img src="{{value.watch.image.url}}" style="height:200px; width:200px">
-      </td>
-      <td>{{o.ordered_date}}</td>
-      <td>{{value.initial_date}}</td>
-      <td>{{value.final_date}}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-    </table>
-{% endblock %}
+        </tr-->
+
+        <div class="card my-3">
+            <div class="card-header">
+                {{value.watch.title}}
+            </div>
+            <div class="card-body">
+                <h4>Order Id:{{o.order_id}}</h4>
+                <img src="{{value.watch.image.url}}" style="height:200px; width:200px">
+                <p class="card-text">Status: {{value.status}}</p>
+                <a href="/orderdetails/{{o.order_id}}" class="btn btn-primary">View Order Details</a>
+            </div>
+        </div>
+
+        {% endfor %}
+        {%endfor%}
+   
+{% endblock %} 
+

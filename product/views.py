@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from .models import Product, Category, Review
-from orderwatch.models import Booking, OrderWatch
+from orderwatch.models import Booking
+from cart.models import OrderWatch
 from math import ceil
 from django.contrib import messages
 from django.conf import settings
@@ -11,17 +12,13 @@ from django.db.models import Q
 from django.core import mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from datetime import date
 
 # Create your views here.
 import datetime 
 import json
 
 b_id = 0
-'''def checkbooking(bookid):
-    b = Booking.objects.filter(booking_id = bookid)
-    idate = b[0].initial_date
-    fdate = b[0].final_date
-    what if user does not logout for many days and places the order after the booking is already taken'''
 
 # Function to covert string to datetime 
 def convert(date_time): 
@@ -55,6 +52,7 @@ def search(request):
     d_max = request.GET.get('returndate')
     cate = request.GET.get('category')
     rating = request.GET.get('rate')
+    qs = Product.objects.all()
     #print(type(rating))
     if(cate == "Choose..."):
         cate = ""
@@ -71,6 +69,7 @@ def search(request):
     if(is_valid_queryparam(maxrent)):
         qs = qs.filter(final_value__lte = maxrent)
 
+    
     if(is_valid_queryparam(cate)):
         c = Category.objects.filter(title = cate)
         if(c is not None):
@@ -82,22 +81,16 @@ def search(request):
     if(is_valid_queryparam(d_min) and is_valid_queryparam(d_max)):
         date_min = datetime.datetime.strptime(d_min, "%d %B %Y").date()
         date_max = datetime.datetime.strptime(d_max, "%d %B %Y").date()
-        q = qs.filter(qty__gte = 1)
-        b = Booking.objects.exclude(
-            initial_date__gte=date_min, final_date__lte=date_max).exclude(
-            initial_date__lte = date_max, final_date__gte = date_max).exclude(initial_date__lte = date_min, final_date__gte= date_max)
-        b1 = Booking.objects.filter(order__isnull = True)
-        b = list(b)
-        for x in b1:
-            b.append(x)
-        if(len(b) == 0):
-            qs = list(q)
-        else:
-            qs = list(q)
-            for book in b:
-                if(book.watch not in qs):
-                    qs.append(book.watch)
-
+        #for every product in qs find whether it is available between the chosen dates
+        for p in qs:
+            pre = Booking.objects.filter(watch = p, order__isnull = False, status ="placed")
+            b = Booking.objects.filter(watch=p, order__isnull = False, status = "placed").exclude(
+                initial_date__gte=date_min, final_date__lte=date_max).exclude(
+                initial_date__lte=date_max, final_date__gte=date_max).exclude(initial_date__lte=date_min, final_date__gte=date_max)
+            l = pre.count() - b.count()
+            if(l >= p.original_qty):
+                qs = qs.exclude(product_id = p.product_id)
+        #print(qs)
     elif(is_valid_queryparam(d_min)):
         messages.error(request, "Please select return date")
         redirect("/homepage")
@@ -134,6 +127,7 @@ def search(request):
                 prods[cat.title] = q
         #print(prods)
     params["prods"] = prods
+    params["currency"] = settings.CURRENCY
     return render(request, "product/homepage.html", params)
 
 def homepage(request):
@@ -150,7 +144,7 @@ def homepage(request):
         nslides = n//4 + ceil((n/4) - (n//4))
         allProds.append([prod, range(1, nslides), nslides])
 
-    params = {"allProds": allProds, "cats":category, "search":0}
+    params = {"allProds": allProds, "cats":category, "search":0, "currency":settings.CURRENCY}
     return render(request, "product/homepage.html", params)
 
 def productview(request, id):
@@ -166,7 +160,6 @@ def productview(request, id):
         params["r" + str(v)] = q.count()
         s = s + q.count() * v
     params["product"] = prod[0]
-    print(params)
     if(c == 0):
         params["rmessage"] = "No reviews for this product yet"
         params["average"] = 0
@@ -175,6 +168,7 @@ def productview(request, id):
         params["rmessage"] = ""
         params["average"] = round(s / c, 1)
         params["totalr"] = c
+    params["currency"] = settings.CURRENCY
     return render (request, "product/productview.html", params)
 
 def checkout(request):
@@ -198,6 +192,7 @@ def checkout(request):
             global b_id
             b = Booking.objects.get(booking_id = b_id)
             b.order = order
+            b.status = "placed"
             b.save()
             l = []
             l.append(request.user.email)
@@ -207,7 +202,7 @@ def checkout(request):
             mail.send_mail(
                 'order details', plain_message, 'pplwatch9@gmail.com', l, html_message=html_message)
             
-            messages.success(request, "Order placed successfully.Check your email for further detials")
+            messages.success(request, "Order placed successfully.Check your email for further details")
             return redirect("/home")
             
         else:
@@ -218,27 +213,21 @@ def checkout(request):
                 return redirect("/product/productview/" + f"{product_id}")
             product_id = request.GET.get("pname", "")
             product = Product.objects.filter(product_id = product_id)
-            #print(product[0].qty)
             if(product[0].qty == 0):
                 d = datetime.datetime.strptime(d, "%d %B %Y").date()
                 e = datetime.datetime.strptime(e, "%d %B %Y").date()
-                pre = Booking.objects.filter(watch = product[0])
-                watches = Booking.objects.filter(watch = product[0]).exclude(
+                pre = Booking.objects.filter(watch = product[0], order__isnull = False, status = "placed")
+                #exclude all bookings which are booked between desired period
+                watches = Booking.objects.filter(watch = product[0], order__isnull = False, status="placed").exclude(
                 initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte = e, final_date__gte = e).exclude(initial_date__lte = d, final_date__gte= e)
-                w1 = Booking.objects.filter(order__isnull = True)
-                watches = list(watches)
-                for x in w1:
-                    watches.append(x)
                 print(watches)
                 l = len(pre) - len(watches)
                 #if all quantities of watch between that period are booked then
-                if(l >= product[0].original_qty or len(watches) == 0):
+                if(l == product[0].original_qty):
                     messages.error(request, "Not available between selected dates!!")
                     return redirect("/product/productview/" + f"{product_id}")
                 
                 else:
-                    print(watches[0].initial_date)
-                    print(watches[0].final_date)
                     b = Booking(watch = product[0], initial_date = d, final_date = e, user = request.user)
                     b.save()
                     b_id = b.booking_id
@@ -255,7 +244,10 @@ def checkout(request):
                 b_id = b.booking_id
             days = (e - d).days
             total = days * p.final_value
-            print(b_id)
+            total = total + p.deposit
+            b.total = total
+            b.save()
+            b.days = days
         return render (request, "product/checkout.html",{"thank":thank,"id":ido, "product":p,"days":days, "total":f'{CURRENCY} {total}',"initial_date":d, "final_date":e, "amount":total})
     else:
         messages.info(request, "You need to login")
@@ -265,6 +257,7 @@ def checkout(request):
 
 def review(request, id):
     k = 0
+    current_date = date.today()
     if(request.method == "POST"):
         #while saving the form 
         try:
@@ -290,10 +283,12 @@ def review(request, id):
             b = Booking.objects.filter(watch__product_id = id, user = request.user, order__isnull = False)
             
             if(len(b) == 0):
-                messages.error(request, "You cannot write a review since u have not rented this")
+                messages.error(request, "You cannot write a review since you have not rented this")
                 return redirect("/product/productview/"+f"{id}")
 
             else:
+                #book = b.filter(initial_date__gte = current_date)
+                #if(len(book) > 0):
                 review = ReviewForm()
                 #in case user has already written a review update the review
                 try:
@@ -304,7 +299,12 @@ def review(request, id):
                         review = ReviewUpdateForm(instance = r)
                 except:
                     pass
-                
+
+                #else:
+                    #messages.error(
+                        #request, "You cannot write a review since you have been delivered this yet")
+                    #return redirect("/product/productview/"+f"{id}")
+                    
             return render(request, "product/review.html", {"product_id":id, "form":review})
         else:
             messages.info(request, "Please Log in to write a review")

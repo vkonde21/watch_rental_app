@@ -1,0 +1,66 @@
+{% extends "login/basic.html"%}
+{% block title %} cart {% endblock %}
+{% block head%}
+<link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock%}
+{% block body%}
+<div class='container'>
+<form>
+{% for p in products%}
+   <div class="card my-3">
+  <div class="card-header">
+    {{p.title}}
+  </div>
+  <div class="card-body">
+  
+    <label for="initialdate">Start Date:</label>
+    <input id="datepickers{{p.product_id}}" name="datepickers{{p.product_id}}" data-provide="datepicker" required>
+    <BR>
+    <label for="returndate">Return Date:</label>
+    <input id="datepickerr{{p.product_id}}" name="datepickerr{{p.product_id}}" data-provide="datepicker" required>
+    <BR>
+    <a href="/removecart/{{p.product_id}}" class="btn btn-primary my-3">Remove from cart</a>
+    <button type="submit" formaction="/check/{{p.product_id}}" class="btn btn-primary mx-5 my-3">Check availability</button>
+    
+  </div>
+</div>
+
+<script>
+var $j = jQuery.noConflict();
+    $j(document).ready(function() {
+        $j(function() {
+            var dateToday = new Date();
+            var n = 2;
+            var id = {{p.product_id}}
+            dateToday.setDate(dateToday.getDate() + n);
+            var dates = $j(`#datepickers${id}, #datepickerr${id}`).datepicker({
+                defaultDate: "+2d",
+                changeMonth: true,
+                numberOfMonths: 1,
+                minDate: dateToday,
+                dateFormat: 'dd MM yy',
+                onSelect: function(selectedDate) {
+                    var option = this.id == `datepickers${id}` ? "minDate" : "maxDate",
+                        instance = $j(this).data(`datepicker`),
+                        date = $j.datepicker.parseDate(instance.settings.dateFormat || $j.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    dates.not(this).datepicker("option", option, date);
+                }
+            });
+        });
+    });
+</script>
+{% endfor %}
+
+{% if products %}
+    <div class="mx-auto">
+    <button type="submit" formaction="/checkorder" class="btn btn-outline-info">Place Order</a>
+    </div>
+{% else %}
+<button type="button" class="btn btn-secondary btn-lg btn-block mt-5">Your Cart is Empty!!</button>
+{% endif %}
+</div>
+</form>
+{% endblock %}
