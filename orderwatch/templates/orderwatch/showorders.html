@@ -1,6 +1,6 @@
 {% extends "login/basic.html" %} {% block title %}showorders {% endblock %} {% block body %}
 
-
+<div class="container">
         {% for o,val in orders.items%}
         {% for value in val %}
         <!--tr>
@@ -13,20 +13,24 @@
 
         </tr-->
 
-        <div class="card my-3">
+        <div class="card my-3 border border-success" >
             <div class="card-header">
                 {{value.watch.title}}
             </div>
             <div class="card-body">
                 <h4>Order Id:{{o.order_id}}</h4>
                 <img src="{{value.watch.image.url}}" style="height:200px; width:200px">
-                <p class="card-text">Status: {{value.status}}</p>
+                <!--p class="card-text">Status: {{value.status}}</p-->
+                <button type="button" class="btn btn-primary">
+                    Status <span class="badge badge-light">{{value.status}}</span>
+                    <span class="sr-only">unread messages</span>
+                </button>
                 <a href="/orderdetails/{{o.order_id}}" class="btn btn-primary">View Order Details</a>
             </div>
         </div>
 
         {% endfor %}
         {%endfor%}
-   
+ </div>  
 {% endblock %} 
 

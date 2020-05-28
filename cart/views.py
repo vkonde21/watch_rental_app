@@ -20,12 +20,12 @@ def check(pid, d, e):
         pre = Booking.objects.filter(watch=product[0], order__isnull=False, status = "placed")
         #exclude all bookings which are booked between desired period
         watches = Booking.objects.filter(watch=product[0], order__isnull=False, status = "placed").exclude(
-            initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte=e, final_date__gte=e).exclude(initial_date__lte=d, final_date__gte=e)
+            initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte=e, final_date__gte=e).exclude(initial_date__lte=d, final_date__gte=e).exclude(initial_date__lte=d,final_date__gte=d )
         print(pre)
         print(watches)
         l = len(pre) - len(watches)
         print(l)
-        if(l == product[0].original_qty):
+        if(l >= product[0].original_qty):
             return 0    #not available
         else:
             return 1
@@ -64,6 +64,9 @@ def removecart(request, product_id):
     return redirect(f"/showcart/{request.user.id}")
 
 def checkavailability(request, product_id):
+    params = {}
+    cart = Cart.objects.get(user=request.user)
+    params["products"] = cart.products.all()
     d = request.GET.get("datepickers" + str(product_id), "")
     e = request.GET.get("datepickerr" + str(product_id), "")
     r = 0
@@ -80,7 +83,9 @@ def checkavailability(request, product_id):
         else:
             messages.success(
                 request, f"{product[0].title} available between selected dates")
-    return redirect(f"/showcart/{request.user.id}")
+            #params[str(product[0].product_id)] = {"d":d, "e":e}
+            
+    return render(request, "cart/showcart.html", params)
 
 
 @login_required
@@ -155,6 +160,9 @@ def checkorder(request):
         d = request.GET.get("datepickers" + str(p.product_id), "")
         e = request.GET.get("datepickerr" + str(p.product_id), "")
         #print("datepickers" + str(p.product_id))
+        if(d == "" or e == ""):
+            messages.error(request, "Please select return date as well as starting date for all products")
+            return redirect(f"/showcart/{request.user.id}")
         r = check(p.product_id, d, e)
         if(r == 0):
             messages.error(

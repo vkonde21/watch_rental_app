@@ -10,9 +10,10 @@
     <h4>Return Date:{{b.final_date}}</h4>
     <h4>Rent: Rs.{{b.watch.final_value}}</h4>
     <h4>Deposit: Rs.{{b.watch.deposit}}</h4>
-    <h4>Amount:Rs.{{b.watch.total}}</h4>
-    <p>Order will be delivered 1 day before the initial date</p>
-    <!--a class="btn btn-primary btn-lg" href="/cancel_order/{{order.order_id}}" role="button">Cancel Order</a-->
+    <h4>Amount:Rs.{{b.total}}</h4>
+    {% if b.status == "placed"%}
+        <a class="btn btn-primary btn-lg" href="/cancel_order/{{order.order_id}}/{{b.booking_id}}" role="button">Cancel Order</a>
+    {% endif%}
 </div>
 {% endfor %}
 <button type="button" class="btn btn-secondary btn-lg btn-block mt-5">Total: Rs.{{order.amount}}</button>

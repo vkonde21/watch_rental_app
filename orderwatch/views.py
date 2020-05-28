@@ -13,6 +13,7 @@ def index(request):
 @login_required
 def showorders(request, id):
     orders = OrderWatch.objects.filter(user = request.user)
+    orders = orders.order_by('-ordered_date')
     params = {}
 
     if(orders.count() == 0):
@@ -42,15 +43,15 @@ def orderdetails(request, id):
     return render(request, "orderwatch/orderdetails.html", params)
 
 @login_required
-def cancel_order(request, orderid):
+def cancel_order(request, orderid, bookingid):
 
     order = OrderWatch.objects.get(order_id=orderid)
     order_date = order.ordered_date
-    print(order_date)
+    #print(order_date)
     current_date = datetime.datetime.now(datetime.timezone.utc)
     date_diff = current_date - order_date
     minutes_diff = date_diff.total_seconds() / 60.0
-    booking = Booking.objects.filter(order__order_id=orderid)
+    booking = Booking.objects.filter(booking_id = bookingid)
     if minutes_diff <= 30:
         for b in booking:
             product = b.watch
@@ -63,8 +64,11 @@ def cancel_order(request, orderid):
                 pro.save()
             
             b.status = "cancelled"
+            b.save()
+            order.amount = order.amount - b.total 
+            order.save()
         messages.add_message(request, messages.SUCCESS, 
-                             'Your order is cancelled.')
+                             f'Your order for {b.watch.title} is cancelled.')
         return redirect('/home')
     else:
         messages.add_message(request, messages.INFO,

@@ -15,12 +15,12 @@
     {{p.title}}
   </div>
   <div class="card-body">
-  
+     
     <label for="initialdate">Start Date:</label>
-    <input id="datepickers{{p.product_id}}" name="datepickers{{p.product_id}}" data-provide="datepicker" required>
+    <input id="datepickers{{p.product_id}}" name="datepickers{{p.product_id}}" data-provide="datepicker">
     <BR>
     <label for="returndate">Return Date:</label>
-    <input id="datepickerr{{p.product_id}}" name="datepickerr{{p.product_id}}" data-provide="datepicker" required>
+    <input id="datepickerr{{p.product_id}}" name="datepickerr{{p.product_id}}" data-provide="datepicker">
     <BR>
     <a href="/removecart/{{p.product_id}}" class="btn btn-primary my-3">Remove from cart</a>
     <button type="submit" formaction="/check/{{p.product_id}}" class="btn btn-primary mx-5 my-3">Check availability</button>

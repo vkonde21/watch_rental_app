@@ -13,6 +13,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from datetime import date
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 import datetime 
@@ -86,7 +87,7 @@ def search(request):
             pre = Booking.objects.filter(watch = p, order__isnull = False, status ="placed")
             b = Booking.objects.filter(watch=p, order__isnull = False, status = "placed").exclude(
                 initial_date__gte=date_min, final_date__lte=date_max).exclude(
-                initial_date__lte=date_max, final_date__gte=date_max).exclude(initial_date__lte=date_min, final_date__gte=date_max)
+                initial_date__lte=date_max, final_date__gte=date_max).exclude(initial_date__lte=date_min, final_date__gte=date_max).exclude(initial_date__lte=date_min, final_date__gte=date_min)
             l = pre.count() - b.count()
             if(l >= p.original_qty):
                 qs = qs.exclude(product_id = p.product_id)
@@ -171,6 +172,7 @@ def productview(request, id):
     params["currency"] = settings.CURRENCY
     return render (request, "product/productview.html", params)
 
+@login_required
 def checkout(request):
     thank = False
     ido = 0
@@ -194,6 +196,11 @@ def checkout(request):
             b.order = order
             b.status = "placed"
             b.save()
+            p = Product.objects.get(product_id = b.watch.product_id)
+            if(p.qty > 0):
+                q = p.qty - 1
+                p.qty = q
+                p.save()
             l = []
             l.append(request.user.email)
             html_message = render_to_string(
@@ -219,7 +226,7 @@ def checkout(request):
                 pre = Booking.objects.filter(watch = product[0], order__isnull = False, status = "placed")
                 #exclude all bookings which are booked between desired period
                 watches = Booking.objects.filter(watch = product[0], order__isnull = False, status="placed").exclude(
-                initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte = e, final_date__gte = e).exclude(initial_date__lte = d, final_date__gte= e)
+                    initial_date__gte=d, final_date__lte=e).exclude(initial_date__lte=e, final_date__gte=e).exclude(initial_date__lte=d, final_date__gte=e).exclude(initial_date__lte=d, final_date__gte=d)
                 print(watches)
                 l = len(pre) - len(watches)
                 #if all quantities of watch between that period are booked then
@@ -231,23 +238,22 @@ def checkout(request):
                     b = Booking(watch = product[0], initial_date = d, final_date = e, user = request.user)
                     b.save()
                     b_id = b.booking_id
+                    print(b_id)
                 p = product[0]
             else:
                 d = datetime.datetime.strptime(d, "%d %B %Y").date()
                 e = datetime.datetime.strptime(e, "%d %B %Y").date()
                 p = Product.objects.get(product_id = product_id)
-                q = p.qty - 1
-                p.qty = q
-                p.save()
                 b = Booking(watch = p, initial_date = d, final_date = e, user = request.user)
                 b.save()
                 b_id = b.booking_id
+                print(b_id)
             days = (e - d).days
             total = days * p.final_value
             total = total + p.deposit
             b.total = total
-            b.save()
             b.days = days
+            b.save()
         return render (request, "product/checkout.html",{"thank":thank,"id":ido, "product":p,"days":days, "total":f'{CURRENCY} {total}',"initial_date":d, "final_date":e, "amount":total})
     else:
         messages.info(request, "You need to login")
@@ -281,7 +287,7 @@ def review(request, id):
     else:
         if(request.user.is_authenticated):
             b = Booking.objects.filter(watch__product_id = id, user = request.user, order__isnull = False)
-            
+            b = b.filter(Q(status = 'placed') | Q(status = 'delivered') | Q(status = 'refund'))
             if(len(b) == 0):
                 messages.error(request, "You cannot write a review since you have not rented this")
                 return redirect("/product/productview/"+f"{id}")
